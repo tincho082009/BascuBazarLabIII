@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using BascuBazarAPI.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 
 namespace BascuBazarAPI.Api
 {
     [Route("api/[controller]")]
+    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class UsuarioController : Controller
     {
@@ -26,13 +31,12 @@ namespace BascuBazarAPI.Api
 
         // GET: api/Usuario
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
-                return contexto.Usuario;
-               //var usuario = "123@gmail";
-               //return Ok(contexto.Usuario.SingleOrDefault(x => x.Email == usuario));
+               var usuario = "agusdragon@gmail";
+               return Ok(contexto.Usuario.SingleOrDefault(x => x.Email == usuario));
             }
             catch (Exception ex)
             {
@@ -40,7 +44,7 @@ namespace BascuBazarAPI.Api
             }
         }
 
-        // GET api/<controller>/5
+        // GET api/<controller>/4
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
@@ -53,6 +57,7 @@ namespace BascuBazarAPI.Api
                 return BadRequest(ex);
             }
         }
+
         /*
         // GET api/<controller>/5
         [HttpPost("login")]
@@ -67,7 +72,7 @@ namespace BascuBazarAPI.Api
                     prf: KeyDerivationPrf.HMACSHA1,
                     iterationCount: 1000,
                     numBytesRequested: 256 / 8));
-                var p = contexto.Propietarios.FirstOrDefault(x => x.Email == loginView.Email);
+                var p = contexto.Usuario.FirstOrDefault(x => x.Email == loginView.Email);
                 if (p == null || p.Clave != hashed)
                 {
                     return BadRequest("Nombre de usuario o clave incorrecta");
@@ -81,7 +86,7 @@ namespace BascuBazarAPI.Api
                     {
                         new Claim(ClaimTypes.Name, p.Email),
                         new Claim("FullName", p.Nombre + " " + p.Apellido),
-                        new Claim(ClaimTypes.Role, "Propietario"),
+                        new Claim(ClaimTypes.Role, "Usuario"),
                     };
 
                     var token = new JwtSecurityToken(
@@ -100,7 +105,6 @@ namespace BascuBazarAPI.Api
             }
         }
         */
-
         // POST api/<controller>
         [HttpPost]
         public async Task<IActionResult> Post(Usuario entidad)
