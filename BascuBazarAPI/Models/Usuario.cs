@@ -18,7 +18,7 @@ namespace BascuBazarAPI.Models
     {
         [Key]
         [DisplayName("Codigo")]
-        public int Id { get; set; }        
+        public int UsuarioId { get; set; }        
         public string Nombre { get; set; }
         public string Apellido { get; set; }
         [Required, EmailAddress]

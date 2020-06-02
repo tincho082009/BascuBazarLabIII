@@ -10,13 +10,13 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace BascuBazarAPI.Api
 {
     [Route("api/[controller]")]
-    //[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class UsuarioController : Controller
     {
@@ -31,12 +31,12 @@ namespace BascuBazarAPI.Api
 
         // GET: api/Usuario
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<ActionResult<IEnumerable<Usuario>>> Get()
         {
             try
             {
-               var usuario = "agusdragon@gmail";
-               return Ok(contexto.Usuario.SingleOrDefault(x => x.Email == usuario));
+                var usuario = User.Claims.ToList().Count + "";
+                return Ok(contexto.Usuario.SingleOrDefault(x => x.Email == usuario));
             }
             catch (Exception ex)
             {
@@ -50,7 +50,7 @@ namespace BascuBazarAPI.Api
         {
             try
             {
-                return Ok(contexto.Usuario.SingleOrDefault(x => x.Id == id));
+                return Ok(contexto.Usuario.SingleOrDefault(x => x.UsuarioId == id));
             }
             catch (Exception ex)
             {
@@ -58,8 +58,7 @@ namespace BascuBazarAPI.Api
             }
         }
 
-        /*
-        // GET api/<controller>/5
+        // POST api/<controller>/login
         [HttpPost("login")]
         [AllowAnonymous]
         public async Task<IActionResult> Login(LoginView loginView)
@@ -104,7 +103,7 @@ namespace BascuBazarAPI.Api
                 return BadRequest(ex);
             }
         }
-        */
+        
         // POST api/<controller>
         [HttpPost]
         public async Task<IActionResult> Post(Usuario entidad)
@@ -115,7 +114,7 @@ namespace BascuBazarAPI.Api
                 {
                     contexto.Usuario.Add(entidad);
                     contexto.SaveChanges();
-                    return CreatedAtAction(nameof(Get), new { id = entidad.Id }, entidad);
+                    return CreatedAtAction(nameof(Get), new { id = entidad.UsuarioId }, entidad);
                 }
                 return BadRequest();
             }
@@ -127,25 +126,39 @@ namespace BascuBazarAPI.Api
 
         // PUT api/<controller>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody]string value)
+        public async Task<IActionResult> Put(int id, Usuario entidad)
         {
-            //contexto.Propietarios.Update()
+            try
+            {
+                if (ModelState.IsValid && contexto.Usuario.AsNoTracking().FirstOrDefault(e => e.UsuarioId == id) != null)
+                {
+                    entidad.UsuarioId = id;
+                    contexto.Usuario.Update(entidad);
+                    contexto.SaveChanges();
+                    return Ok(entidad);
+                }
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
         }
 
         // DELETE api/<controller>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
-
-        // GET: api/<controller>
-        [HttpGet("test")]
-        [AllowAnonymous]
-        public async Task<IActionResult> Test()
+        public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                return Ok("anduvo");
+                var entidad = contexto.Usuario.FirstOrDefault(e => e.UsuarioId == id);
+                if (entidad != null)
+                {
+                    contexto.Usuario.Remove(entidad);
+                    contexto.SaveChanges();
+                    return Ok();
+                }
+                return BadRequest();
             }
             catch (Exception ex)
             {
