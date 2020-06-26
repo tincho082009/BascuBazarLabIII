@@ -17,6 +17,7 @@ using Microsoft.IdentityModel.Tokens;
 namespace BascuBazarAPI.Api
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class UsuarioController : Controller
     {
@@ -31,26 +32,12 @@ namespace BascuBazarAPI.Api
 
         // GET: api/Usuario
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> Get()
+        public async Task<IActionResult> Get()
         {
             try
             {
-                var usuario = User.Claims.ToList().Count + "";
-                return Ok(contexto.Usuario.SingleOrDefault(x => x.Email == usuario));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
-        }
-
-        // GET api/<controller>/4
-        [HttpGet("{id}")]
-        public async Task<IActionResult> Get(int id)
-        {
-            try
-            {
-                return Ok(contexto.Usuario.SingleOrDefault(x => x.UsuarioId == id));
+                var usuarioProp = User.Identity.Name;
+                return Ok(contexto.Usuario.SingleOrDefault(x => x.Email == usuarioProp));
             }
             catch (Exception ex)
             {
@@ -125,14 +112,26 @@ namespace BascuBazarAPI.Api
         }
 
         // PUT api/<controller>/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Usuario entidad)
+        [HttpPut]
+        public async Task<IActionResult> Put(Usuario entidad)
         {
             try
             {
-                if (ModelState.IsValid && contexto.Usuario.AsNoTracking().FirstOrDefault(e => e.UsuarioId == id) != null)
+                var usuarioProp = User.Identity.Name;
+                var user = contexto.Usuario.AsNoTracking().SingleOrDefault(e => e.Email == usuarioProp);
+                if (ModelState.IsValid && contexto.Usuario.AsNoTracking().FirstOrDefault(e => e.Email == usuarioProp) != null)
                 {
-                    entidad.UsuarioId = id;
+
+                    var contra = entidad.Clave;
+                    entidad.Clave = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                        password: contra,
+                        salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
+                        prf: KeyDerivationPrf.HMACSHA1,
+                        iterationCount: 1000,
+                        numBytesRequested: 256 / 8));
+                    entidad.UsuarioId = user.UsuarioId;
+                    entidad.Rol = user.Rol;
+                    entidad.TokenNotificacion = user.TokenNotificacion;
                     contexto.Usuario.Update(entidad);
                     contexto.SaveChanges();
                     return Ok(entidad);

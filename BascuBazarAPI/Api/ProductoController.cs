@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BascuBazarAPI.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 namespace BascuBazarAPI.Api
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
     public class ProductoController : Controller
     {
@@ -50,9 +53,10 @@ namespace BascuBazarAPI.Api
                 return BadRequest(ex);
             }
         }
-        //GET: api/Producto/search?{categoriaId}
-        [HttpGet("search")]
-        public async Task<IActionResult> GetProductosPorCategoria(int categoriaId)
+
+        //GET: api/Producto/search/{categoriaId}
+        [HttpGet("search/{categoriaId}")]
+        public async Task<ActionResult<IEnumerable<Producto>>> GetProductosPorCategoria(int categoriaId)
         {
             try
             {

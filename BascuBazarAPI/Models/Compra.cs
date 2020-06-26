@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 
 namespace BascuBazarAPI.Models
 {
-    public class Pedido
+    public class Compra
     {
         [Key]
         [DisplayName("Codigo")]
-        public int PedidoId { get; set; }
-        public DateTime FechaPedido { get; set; }
+        public int CompraId { get; set; }
+        public DateTime FechaCompra { get; set; }
         public int UsuarioId { get; set; }
         [ForeignKey("UsuarioId")]
         public Usuario Usuario { get; set; }

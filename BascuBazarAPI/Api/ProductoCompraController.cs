@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BascuBazarAPI.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,32 +13,34 @@ using Microsoft.Extensions.Configuration;
 namespace BascuBazarAPI.Api
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
-    public class PedidoController : ControllerBase
+    public class ProductoCompraController : Controller
     {
         private readonly DataContext contexto;
         private readonly IConfiguration config;
 
-        public PedidoController(DataContext contexto, IConfiguration config)
+        public ProductoCompraController(DataContext contexto, IConfiguration config)
         {
             this.contexto = contexto;
             this.config = config;
         }
 
-        // GET: api/Pedido
+        // GET: api/ProductoPedido
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Pedido>>> Get()
+        public async Task<ActionResult<IEnumerable<ProductoCompra>>> Get()
         {
-            return Ok(contexto.Pedido.Include(e => e.Usuario).ToList());
+            var user = User.Identity.Name;
+            return Ok(contexto.ProductoCompra.Include(e=> e.Producto).Include(e=> e.Compra).Where(e=>e.Compra.Usuario.Email == user).ToList());
         }
 
-        // GET: api/Pedido/5
+        // GET: api/ProductoPedido/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             try
             {
-                return Ok(contexto.Pedido.Include(x=> x.Usuario).SingleOrDefault(x => x.PedidoId == id));
+                return Ok(contexto.Producto.SingleOrDefault(x => x.ProductoId == id));
             }
             catch (Exception ex)
             {
@@ -44,17 +48,17 @@ namespace BascuBazarAPI.Api
             }
         }
 
-        // POST: api/Pedido
+        // POST: api/ProductoPedido
         [HttpPost]
-        public async Task<IActionResult> Post(Pedido entidad)
+        public async Task<IActionResult> Post(ProductoCompra entidad)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    contexto.Pedido.Add(entidad);
+                    contexto.ProductoCompra.Add(entidad);
                     contexto.SaveChanges();
-                    return CreatedAtAction(nameof(Get), new { id = entidad.PedidoId }, entidad);
+                    return CreatedAtAction(nameof(Get), new { id = entidad.ProductoCompraId }, entidad);
                 }
                 return BadRequest();
             }
@@ -64,16 +68,16 @@ namespace BascuBazarAPI.Api
             }
         }
 
-        // PUT: api/Pedido/5
+        // PUT: api/ProductoPedido/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, Pedido entidad)
+        public async Task<IActionResult> Put(int id, ProductoCompra entidad)
         {
             try
             {
-                if (ModelState.IsValid && contexto.Pedido.AsNoTracking().FirstOrDefault(e => e.PedidoId == id) != null)
+                if (ModelState.IsValid && contexto.ProductoCompra.AsNoTracking().FirstOrDefault(e => e.ProductoCompraId == id) != null)
                 {
-                    entidad.PedidoId = id;
-                    contexto.Pedido.Update(entidad);
+                    entidad.ProductoCompraId = id;
+                    contexto.ProductoCompra.Update(entidad);
                     contexto.SaveChanges();
                     return Ok(entidad);
                 }
@@ -91,10 +95,10 @@ namespace BascuBazarAPI.Api
         {
             try
             {
-                var entidad = contexto.Pedido.FirstOrDefault(e => e.PedidoId == id);
+                var entidad = contexto.ProductoCompra.FirstOrDefault(e => e.ProductoCompraId == id);
                 if (entidad != null)
                 {
-                    contexto.Pedido.Remove(entidad);
+                    contexto.ProductoCompra.Remove(entidad);
                     contexto.SaveChanges();
                     return Ok();
                 }

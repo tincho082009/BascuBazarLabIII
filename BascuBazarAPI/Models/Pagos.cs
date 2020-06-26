@@ -18,8 +18,8 @@ namespace BascuBazarAPI.Models
         [DisplayName("Fecha de pago"), DataType(DataType.Date)]
         public DateTime FechaPago { get; set; }
         public decimal Precio { get; set; }
-        public int PedidoId { get; set; }
-        [ForeignKey("PedidoId")]
-        public Pedido ContratoAlquiler { get; set; }
+        public int CompraId { get; set; }
+        [ForeignKey("CompraId")]
+        public Compra ContratoAlquiler { get; set; }
     }
 }

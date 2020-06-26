@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace BascuBazarAPI.Models
 {
-    public class ProductoPedido
+    public class ProductoCompra
     {
         [Key]
         [DisplayName("Codigo")]
-        public int ProductoPedidoId { get; set; }
+        public int ProductoCompraId { get; set; }
         public int Cantidad { get; set; }
         public decimal Precio { get; set; }
         public string Descripcion { get; set; }
         public int ProductoId { get; set; }
         [ForeignKey("ProductoId")]
         public Producto Producto { get; set; }
-        public int PedidoId { get; set; }
-        [ForeignKey("PedidoId")]
-        public Pedido Pedido { get; set; }
+        public int CompraId { get; set; }
+        [ForeignKey("CompraId")]
+        public Compra Compra { get; set; }
     }
 }

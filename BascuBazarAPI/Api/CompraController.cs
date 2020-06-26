@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BascuBazarAPI.Models;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,33 +13,33 @@ using Microsoft.Extensions.Configuration;
 namespace BascuBazarAPI.Api
 {
     [Route("api/[controller]")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     [ApiController]
-    public class ProductoPedidoController : Controller
+    public class CompraController : Controller
     {
         private readonly DataContext contexto;
         private readonly IConfiguration config;
 
-        public ProductoPedidoController(DataContext contexto, IConfiguration config)
+        public CompraController(DataContext contexto, IConfiguration config)
         {
             this.contexto = contexto;
             this.config = config;
         }
 
-        // GET: api/ProductoPedido
+        // GET: api/Compra
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ProductoPedido>>> Get()
+        public async Task<ActionResult<IEnumerable<Compra>>> Get()
         {
-
-            return Ok(contexto.ProductoPedido.Include(e=> e.Producto).Include(e=> e.Pedido).ToList());
+            return Ok(contexto.Compra.Include(e => e.Usuario).ToList());
         }
 
-        // GET: api/ProductoPedido/5
+        // GET: api/Compra/5
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
         {
             try
             {
-                return Ok(contexto.Producto.SingleOrDefault(x => x.ProductoId == id));
+                return Ok(contexto.Compra.Include(x=> x.Usuario).SingleOrDefault(x => x.CompraId == id));
             }
             catch (Exception ex)
             {
@@ -45,17 +47,20 @@ namespace BascuBazarAPI.Api
             }
         }
 
-        // POST: api/ProductoPedido
+        // POST: api/Compra
         [HttpPost]
-        public async Task<IActionResult> Post(ProductoPedido entidad)
+        public async Task<IActionResult> Post(Compra entidad)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    contexto.ProductoPedido.Add(entidad);
+                    var usuarioPrueba = User.Identity.Name;
+                    int id = contexto.Usuario.Single(e => e.Email == usuarioPrueba).UsuarioId;
+                    entidad.UsuarioId = id;
+                    contexto.Compra.Add(entidad);
                     contexto.SaveChanges();
-                    return CreatedAtAction(nameof(Get), new { id = entidad.ProductoPedidoId }, entidad);
+                    return CreatedAtAction(nameof(Get), new { id = entidad.CompraId }, entidad);
                 }
                 return BadRequest();
             }
@@ -65,16 +70,16 @@ namespace BascuBazarAPI.Api
             }
         }
 
-        // PUT: api/ProductoPedido/5
+        // PUT: api/Compra/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(int id, ProductoPedido entidad)
+        public async Task<IActionResult> Put(int id, Compra entidad)
         {
             try
             {
-                if (ModelState.IsValid && contexto.ProductoPedido.AsNoTracking().FirstOrDefault(e => e.ProductoPedidoId == id) != null)
+                if (ModelState.IsValid && contexto.Compra.AsNoTracking().FirstOrDefault(e => e.CompraId == id) != null)
                 {
-                    entidad.ProductoPedidoId = id;
-                    contexto.ProductoPedido.Update(entidad);
+                    entidad.CompraId = id;
+                    contexto.Compra.Update(entidad);
                     contexto.SaveChanges();
                     return Ok(entidad);
                 }
@@ -92,10 +97,10 @@ namespace BascuBazarAPI.Api
         {
             try
             {
-                var entidad = contexto.ProductoPedido.FirstOrDefault(e => e.ProductoPedidoId == id);
+                var entidad = contexto.Compra.FirstOrDefault(e => e.CompraId == id);
                 if (entidad != null)
                 {
-                    contexto.ProductoPedido.Remove(entidad);
+                    contexto.Compra.Remove(entidad);
                     contexto.SaveChanges();
                     return Ok();
                 }
