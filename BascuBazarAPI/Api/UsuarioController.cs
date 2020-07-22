@@ -122,13 +122,7 @@ namespace BascuBazarAPI.Api
                 if (ModelState.IsValid && contexto.Usuario.AsNoTracking().FirstOrDefault(e => e.Email == usuarioProp) != null)
                 {
 
-                    var contra = entidad.Clave;
-                    entidad.Clave = Convert.ToBase64String(KeyDerivation.Pbkdf2(
-                        password: contra,
-                        salt: System.Text.Encoding.ASCII.GetBytes(config["Salt"]),
-                        prf: KeyDerivationPrf.HMACSHA1,
-                        iterationCount: 1000,
-                        numBytesRequested: 256 / 8));
+                    entidad.Clave = user.Clave;
                     entidad.UsuarioId = user.UsuarioId;
                     entidad.Rol = user.Rol;
                     entidad.TokenNotificacion = user.TokenNotificacion;

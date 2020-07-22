@@ -31,7 +31,7 @@ namespace BascuBazarAPI.Api
         public async Task<ActionResult<IEnumerable<ProductoCompra>>> Get()
         {
             var user = User.Identity.Name;
-            return Ok(contexto.ProductoCompra.Include(e=> e.Producto).Include(e=> e.Compra).Where(e=>e.Compra.Usuario.Email == user).ToList());
+            return Ok(contexto.ProductoCompra.Include(e=> e.Producto).Include(e=> e.Compra).Where(e=>e.Compra.Usuario.Email == user));
         }
 
         // GET: api/ProductoPedido/5

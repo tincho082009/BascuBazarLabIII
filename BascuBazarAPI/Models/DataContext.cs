@@ -18,5 +18,7 @@ namespace BascuBazarAPI.Models
         public DbSet<ProductoCompra> ProductoCompra { get; set; }
         public DbSet<Categoria> Categoria { get; set; }
         public DbSet<Pagos> Pagos { get; set; }
+
+        public DbSet<Foto> Foto { get; set; }
     }
 }

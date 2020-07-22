@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -61,6 +62,20 @@ namespace BascuBazarAPI.Api
             try
             {
                 return Ok(contexto.Producto.Include(x => x.Categoria).Where(x => x.CategoriaId == categoriaId));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+        //GET: api/Producto/search/descripcion/{descripcion}
+        [HttpGet("search/descripcion/{descripcion}")]
+        public async Task<IActionResult> GetProductosPorDescripcion(string descripcion)
+        {
+            try
+            {
+                return Ok(contexto.Producto.SingleOrDefault(x => x.Descripcion.Equals(descripcion)));
             }
             catch (Exception ex)
             {
